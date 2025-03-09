@@ -7,11 +7,14 @@ import axios from 'axios'
 import { ref } from 'vue'
 const userName = ref('')
 let activeColor = ref('green')
+let loading = ref('false');
 
+// CSC : correctif de results[1] en results[0] , mauvais indice pour récupérer les infos du fichier distant JSON (API REST)
 function getUser() {
+  loading.value = true;
   axios.get('https://randomuser.me/api/')
   .then(function (response) {
-    const name = response.data.results[1].name;
+    const name = response.data.results[0].name;
     userName.value = name.title + ' ' + 
                      name.first + ' ' + 
                      name.last;
@@ -19,11 +22,23 @@ function getUser() {
   .catch(function (error) {
     activeColor = ref('red')
     userName.value = error
-  })
+  }).finally(() => {
+          loading.value = false;
+   });
 }
 
 const ageOfRegistered = '';
 
+</script>
+<script  lang="ts">
+export default {
+  data() {
+    return {
+      idVueJs: 'divVueJs',
+      loading: false,
+    };
+  },
+};
 </script>
 
 <template>
@@ -33,7 +48,8 @@ const ageOfRegistered = '';
     </template>
     <template #heading>Présentation</template>
 
-    Vous trouverez ci-dessous une liste de tâches de difficultés croissantes, afin d'évaluer votre maitrise de : <u>Javascript, HTML, CSS et VueJS</u>.<br/>
+    Vous trouverez ci-dessous une liste de tâches de difficultés croissantes, afin d'évaluer votre maitrise de : <u><span id="idJs" >Javascript</span>, <span style="color:chartreuse" 
+                     onmouseover="this.style.color='yellow';this.style.fontWeight='bold'"  onmouseout="this.style.color='chartreuse';this.style.fontWeight='normal'" >HTML</span>, <span class="colorCSS">CSS</span> et <span v-bind:id="idVueJs">VueJS</span></u>.<br/>
     <br/>    
 
   </EvaluationItem>
@@ -57,7 +73,11 @@ const ageOfRegistered = '';
     <template #heading>Débogage Javascript</template>
     Ici, il y a un bogue qui empêche d'afficher le nom d'une personne. Vous devez comprendre le résultat de la requête et corriger ce bogue. <br/>
     En bonus, vous devrez afficher l'email et l'image au format vignette de la personne.<br/>
-    <button variant="primary" v-on:click="getUser">Obtenir un nom</button>
+    <button variant="primary" v-on:click="getUser" v-bind:disabled="loading.value">Obtenir un nom</button>
+    <div class="loader" v-if="loading.value">
+      <img class="loaderImg" src="../assets/spinner2.gif">
+    </div>
+
     <br/>
     <p :style="{color: activeColor}"> {{ userName }} </p>
   </EvaluationItem>
@@ -84,5 +104,39 @@ const ageOfRegistered = '';
 }
 .age{
   color: blue;
+  
 }
+.colorCSS{
+  color: cornflowerblue;
+}
+.colorCSS:hover{
+  color: cyan ;
+  font-weight: bold;
+}
+
+#divVueJs{
+  color:darkgreen;
+}
+#divVueJs:hover{
+  color:darkseagreen;
+  font-weight: bold;
+}
+
+.loader{  /* Loader Div Class */
+    position: absolute;
+    top:0px;
+    right:0px;
+    width: 100px;
+    height:100px;
+    align-content: center;
+    background-color:#eceaea;
+    background-image: url('../assets/ajax-loader.gif');
+    background-size: 50px;
+    background-repeat:no-repeat;
+    background-position:center;
+    z-index:10000000;
+    opacity: 0.4;
+    filter: alpha(opacity=40);
+}
+
 </style>
